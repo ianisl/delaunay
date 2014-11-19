@@ -13,10 +13,10 @@ var Delaunay;
         i, dx, dy, dmax, xmid, ymid;
 
     for(i = vertices.length; i--; ) {
-      if(vertices[i][0] < xmin) xmin = vertices[i][0];
-      if(vertices[i][0] > xmax) xmax = vertices[i][0];
-      if(vertices[i][1] < ymin) ymin = vertices[i][1];
-      if(vertices[i][1] > ymax) ymax = vertices[i][1];
+      if(vertices[i].x < xmin) xmin = vertices[i].x;
+      if(vertices[i].x > xmax) xmax = vertices[i].x;
+      if(vertices[i].y < ymin) ymin = vertices[i].y;
+      if(vertices[i].y > ymax) ymax = vertices[i].y;
     }
 
     dx = xmax - xmin;
@@ -26,19 +26,19 @@ var Delaunay;
     ymid = ymin + dy * 0.5;
 
     return [
-      [xmid - 20 * dmax, ymid -      dmax],
-      [xmid            , ymid + 20 * dmax],
-      [xmid + 20 * dmax, ymid -      dmax]
+      {x: xmid - 20 * dmax, y: ymid -      dmax},
+      {x: xmid            , y: ymid + 20 * dmax},
+      {x: xmid + 20 * dmax, y: ymid -      dmax}
     ];
   }
 
   function circumcircle(vertices, i, j, k) {
-    var x1 = vertices[i][0],
-        y1 = vertices[i][1],
-        x2 = vertices[j][0],
-        y2 = vertices[j][1],
-        x3 = vertices[k][0],
-        y3 = vertices[k][1],
+    var x1 = vertices[i].x,
+        y1 = vertices[i].y,
+        x2 = vertices[j].x,
+        y2 = vertices[j].y,
+        x3 = vertices[k].x,
+        y3 = vertices[k].y,
         fabsy1y2 = Math.abs(y1 - y2),
         fabsy2y3 = Math.abs(y2 - y3),
         xc, yc, m1, m2, mx1, mx2, my1, my2, dx, dy;
@@ -102,7 +102,7 @@ var Delaunay;
   }
 
   Delaunay = {
-    triangulate: function(vertices, key) {
+    triangulate: function(vertices) {
       var n = vertices.length,
           i, j, indices, st, open, closed, edges, dx, dy, a, b, c;
 
@@ -115,10 +115,6 @@ var Delaunay;
        * later on!) */
       vertices = vertices.slice(0);
 
-      if(key)
-        for(i = n; i--; )
-          vertices[i] = vertices[i][key];
-
       /* Make an array of indices into the vertex array, sorted by the
        * vertices' x-position. */
       indices = new Array(n);
@@ -127,7 +123,7 @@ var Delaunay;
         indices[i] = i;
 
       indices.sort(function(i, j) {
-        return vertices[j][0] - vertices[i][0];
+        return vertices[j].x - vertices[i].x;
       });
 
       /* Next, find the vertices of the supertriangle (which contains all other
@@ -154,7 +150,7 @@ var Delaunay;
           /* If this point is to the right of this triangle's circumcircle,
            * then this triangle should never get checked again. Remove it
            * from the open list, add it to the closed list, and skip. */
-          dx = vertices[c][0] - open[j].x;
+          dx = vertices[c].x - open[j].x;
           if(dx > 0.0 && dx * dx > open[j].r) {
             closed.push(open[j]);
             open.splice(j, 1);
@@ -162,7 +158,7 @@ var Delaunay;
           }
 
           /* If we're outside the circumcircle, skip this triangle. */
-          dy = vertices[c][1] - open[j].y;
+          dy = vertices[c].y - open[j].y;
           if(dx * dx + dy * dy - open[j].r > EPSILON)
             continue;
 
